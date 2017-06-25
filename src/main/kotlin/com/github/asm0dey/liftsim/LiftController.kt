@@ -3,21 +3,20 @@ package com.github.asm0dey.liftsim
 import com.github.asm0dey.liftsim.DoorsController.closeDoors
 import com.github.asm0dey.liftsim.DoorsController.cycleDoorsIfClosed
 import com.github.asm0dey.liftsim.DoorsController.doorsClosed
-import com.github.asm0dey.liftsim.model.Where.INSIDE
-import com.github.asm0dey.liftsim.model.Where.OUTSIDE
 import com.github.asm0dey.liftsim.model.BuildingAndLiftConfig
 import com.github.asm0dey.liftsim.model.Command
+import com.github.asm0dey.liftsim.model.Where.INSIDE
+import com.github.asm0dey.liftsim.model.Where.OUTSIDE
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.util.concurrent.LinkedBlockingDeque
-import kotlin.concurrent.thread
 
 object LiftController {
     private val commands = LinkedBlockingDeque<Command>()
     @Volatile private var busy = false
     @Volatile private var currentFloor = 1
 
-    fun launch(conf: BuildingAndLiftConfig) = thread(name = "lift-controller") {
+    fun launch(conf: BuildingAndLiftConfig) = executors.submit {
         val cycleDoorsIfClosed = { cycleDoorsIfClosed(conf.openCloseTime) }
         while (true) {
             val (where, targetFloor) = commands.take()
@@ -41,7 +40,7 @@ object LiftController {
 
             //we launch it in separate thread to be able to handle commands as soon as possible,
             // not waiting for lift finish its actions
-            thread(name = "lift-mover") {
+            executors.submit {
                 if (where == INSIDE && !doorsClosed)
                     closeDoors()
 

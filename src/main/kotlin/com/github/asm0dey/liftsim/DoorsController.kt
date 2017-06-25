@@ -1,16 +1,15 @@
 package com.github.asm0dey.liftsim
 
 import java.math.BigDecimal
-import kotlin.concurrent.thread
 
 object DoorsController {
     @Volatile var doorsClosed = true
         private set
-    @Volatile private var openCloseProgress: Thread = thread(start = false) { }
+    @Volatile private var openCloseProgress = executors.submit { }
 
     fun cycleDoorsIfClosed(openCloseTime: BigDecimal) {
         if (!doorsClosed) return
-        openCloseProgress = thread(name = "doors-controller") {
+        openCloseProgress = executors.submit {
             doorsClosed = false
             println("Doors are open")
             try {
@@ -24,8 +23,7 @@ object DoorsController {
     }
 
     fun closeDoors() {
-        if (openCloseProgress.isAlive)
-            openCloseProgress.interrupt()
+        openCloseProgress.cancel(true)
         closeDoorsInternal()
     }
 

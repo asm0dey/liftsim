@@ -6,7 +6,9 @@ import com.github.asm0dey.liftsim.model.Where.INSIDE
 import com.github.asm0dey.liftsim.model.Where.OUTSIDE
 import com.github.asm0dey.liftsim.model.BuildingAndLiftConfig
 import com.github.asm0dey.liftsim.model.Command
+import java.util.concurrent.Executors
 
+val executors = Executors.newFixedThreadPool(3)
 
 fun main(args: Array<String>) {
     val conf = BuildingAndLiftConfig()
