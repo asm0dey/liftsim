@@ -2,9 +2,10 @@ package com.github.asm0dey.liftsim
 
 import com.beust.jcommander.JCommander
 import com.beust.jcommander.ParameterException
-import com.github.asm0dey.liftsim.Where.INSIDE
-import com.github.asm0dey.liftsim.Where.OUTSIDE
+import com.github.asm0dey.liftsim.model.Where.INSIDE
+import com.github.asm0dey.liftsim.model.Where.OUTSIDE
 import com.github.asm0dey.liftsim.model.BuildingAndLiftConfig
+import com.github.asm0dey.liftsim.model.Command
 
 
 fun main(args: Array<String>) {
