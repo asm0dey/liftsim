@@ -8,8 +8,8 @@ object DoorsController {
     @Volatile private var openCloseProgress: Thread = thread(start = false) { }
 
     fun cycleDoorsIfClosed(openCloseTime: BigDecimal) {
+        if (!doorsClosed) return
         openCloseProgress = thread(name = "doors-controller") {
-            if (!doorsClosed) return@thread
             doorsClosed = false
             println("Doors are open")
             try {
