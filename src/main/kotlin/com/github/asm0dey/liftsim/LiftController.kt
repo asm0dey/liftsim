@@ -20,7 +20,7 @@ object LiftController {
     fun launch(conf: BuildingAndLiftConfig) = thread(name = "lift-controller") {
         val cycleDoorsIfClosed = { cycleDoorsIfClosed(conf.openCloseTime) }
         while (true) {
-            val (where, targetFloor) = commands.take()!!
+            val (where, targetFloor) = commands.take()
 
             if (busy || targetFloor != currentFloor && !doorsClosed && where == OUTSIDE) {
                 println("Elevator is busy. Please, try again later.")
