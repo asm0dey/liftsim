@@ -40,11 +40,12 @@ fun main(args: Array<String>) {
     done.
     Available commands:
       i fn — send elevator to floor fn from inside
-      o fn - call elevator to floor fn from outside
-      exit - exit application
+      o fn — call elevator to floor fn from outside
+      exit — exit application
 
-    See more ad README.md""")
+    See more ad README.md
 
+""")
 
     LiftController.launch(conf)
 
@@ -52,7 +53,7 @@ fun main(args: Array<String>) {
         val readLine = readLine()?.replace("\n", "")?.trim() ?: continue
         if ("exit" == readLine) break
         try {
-            LiftController.execute(parseCommand(readLine))
+            LiftController.invoke(parseCommand(readLine))
         } catch (e: IllegalArgumentException) {
             System.err.println(e)
         }

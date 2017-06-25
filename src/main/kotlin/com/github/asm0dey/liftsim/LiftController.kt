@@ -1,6 +1,8 @@
 package com.github.asm0dey.liftsim
 
 import com.github.asm0dey.liftsim.DoorsController.closeDoors
+import com.github.asm0dey.liftsim.DoorsController.cycleDoorsIfClosed
+import com.github.asm0dey.liftsim.DoorsController.doorsOpened
 import com.github.asm0dey.liftsim.Where.INSIDE
 import com.github.asm0dey.liftsim.Where.OUTSIDE
 import com.github.asm0dey.liftsim.model.BuildingAndLiftConfig
@@ -15,11 +17,11 @@ object LiftController {
     @Volatile private var currentFloor = 1
 
     fun launch(conf: BuildingAndLiftConfig) = thread(name = "lift-controller") {
-        val openClose = { DoorsController.openCloseCycle(conf.openCloseTime) }
+        val cycleDoorsIfClosed = { cycleDoorsIfClosed(conf.openCloseTime) }
         while (true) {
             val (where, targetFloor) = commands.take()!!
 
-            if (targetFloor != currentFloor && DoorsController.doorsOpened() && where == OUTSIDE || busy) {
+            if (busy || targetFloor != currentFloor && doorsOpened() && where == OUTSIDE) {
                 println("Elevator is busy. Please, try again later.")
                 continue
             }
@@ -30,18 +32,18 @@ object LiftController {
             }
 
             if (currentFloor == targetFloor) {
-                openClose()
+                cycleDoorsIfClosed()
                 continue
             }
 
-            if (where == INSIDE && DoorsController.doorsOpened()) {
-                closeDoors()
-            }
-
             busy = true
+
             //we launch it in separate thread to be able to handle commands as soon as possible,
             // not waiting for lift finish its actions
-            thread {
+            thread(name = "lift-mover") {
+                if (where == INSIDE && doorsOpened())
+                    closeDoors()
+
                 val timePerFloor = conf.floorHeight.divide(conf.speed, 3, RoundingMode.HALF_EVEN)
                 val floorsToVisit =
                         if (currentFloor < targetFloor) currentFloor + 1..targetFloor
@@ -51,12 +53,12 @@ object LiftController {
                     Thread.sleep(millisPerFloor)
                     println("On floor $it")
                 }
-                openClose()
+                cycleDoorsIfClosed()
                 currentFloor = targetFloor
                 busy = false
             }
         }
     }
 
-    fun execute(c: Command) = commands.add(c)
+    fun invoke(c: Command) = commands.add(c)
 }
