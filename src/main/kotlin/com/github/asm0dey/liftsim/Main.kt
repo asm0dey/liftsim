@@ -65,24 +65,22 @@ fun main(args: Array<String>) {
     System.exit(0)
 }
 
-private fun parser(conf: BuildingAndLiftConfig): (String) -> Command {
-    return {
-        val split = it.split(" ")
-        if (split.size != 2)
-            throw IllegalArgumentException("command is in incorrect format")
-        if (!(split[0].equals("i", true) || split[0].equals("o", true)))
-            throw IllegalArgumentException("it neither outside nor inside elevator call. Please, check")
-        try {
-            val floorNumber = split[1].toInt()
-            if (floorNumber > conf.floors!! || floorNumber < 1)
-                throw IllegalArgumentException("Call from nonexistent floor! It's miracle! But not reacting")
-            Command(
-                    where = if (split[0].equals("i", true)) INSIDE else OUTSIDE,
-                    floorNumber = floorNumber
-            )
-        } catch (e: NumberFormatException) {
-            throw IllegalArgumentException("Illegal floor number: ${split[1]}", e)
-        }
+private fun parser(conf: BuildingAndLiftConfig): (String) -> Command = {
+    val split = it.split(" ")
+    if (split.size != 2)
+        throw IllegalArgumentException("command is in incorrect format")
+    if (!(split[0].equals("i", true) || split[0].equals("o", true)))
+        throw IllegalArgumentException("it neither outside nor inside elevator call. Please, check")
+    try {
+        val floorNumber = split[1].toInt()
+        if (floorNumber > conf.floors!! || floorNumber < 1)
+            throw IllegalArgumentException("Call from nonexistent floor! It's miracle! But not reacting")
+        Command(
+                where = if (split[0].equals("i", true)) INSIDE else OUTSIDE,
+                floorNumber = floorNumber
+        )
+    } catch (e: NumberFormatException) {
+        throw IllegalArgumentException("Illegal floor number: ${split[1]}", e)
     }
 }
 
