@@ -1,8 +1,11 @@
 package com.github.asm0dey.liftsim
 
 import com.github.asm0dey.liftsim.DoorsController.closeDoors
+import com.github.asm0dey.liftsim.Where.INSIDE
+import com.github.asm0dey.liftsim.Where.OUTSIDE
 import com.github.asm0dey.liftsim.model.BuildingAndLiftConfig
 import java.math.BigDecimal
+import java.math.RoundingMode
 import java.util.concurrent.LinkedBlockingDeque
 import kotlin.concurrent.thread
 
@@ -16,7 +19,7 @@ object LiftController {
         while (true) {
             val (where, targetFloor) = commands.take()!!
 
-            if (targetFloor != currentFloor && DoorsController.doorsOpened() && where != Where.INSIDE || busy) {
+            if (targetFloor != currentFloor && DoorsController.doorsOpened() && where == OUTSIDE || busy) {
                 println("Elevator is busy. Please, try again later.")
                 continue
             }
@@ -31,7 +34,7 @@ object LiftController {
                 continue
             }
 
-            if (where == Where.INSIDE && DoorsController.doorsOpened()) {
+            if (where == INSIDE && DoorsController.doorsOpened()) {
                 closeDoors()
             }
 
@@ -39,12 +42,13 @@ object LiftController {
             //we launch it in separate thread to be able to handle commands as soon as possible,
             // not waiting for lift finish its actions
             thread {
-                val timePerFloor = conf.floorHeight / conf.speed
-                val range =
-                        if (currentFloor < targetFloor) (currentFloor + 1..targetFloor)
-                        else (currentFloor - 1 downTo targetFloor)
-                range.forEach {
-                    Thread.sleep((timePerFloor * BigDecimal("1000")).toLong())
+                val timePerFloor = conf.floorHeight.divide(conf.speed, 3, RoundingMode.HALF_EVEN)
+                val floorsToVisit =
+                        if (currentFloor < targetFloor) currentFloor + 1..targetFloor
+                        else currentFloor - 1 downTo targetFloor
+                floorsToVisit.forEach {
+                    val millisPerFloor = (timePerFloor * BigDecimal("1000")).toLong()
+                    Thread.sleep(millisPerFloor)
                     println("On floor $it")
                 }
                 openClose()
@@ -54,5 +58,5 @@ object LiftController {
         }
     }
 
-    fun addCommand(c: Command) = commands.add(c)
+    fun execute(c: Command) = commands.add(c)
 }

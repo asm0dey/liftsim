@@ -34,7 +34,7 @@ fun main(args: Array<String>) {
     Building house with ${conf.floors} floors, ${conf.floorHeight} m. floor height
     and elevator with following characteristics:
      speed: ${conf.speed} m/s,
-     time from door opening to automatic close ${conf.openCloseTime} s.""")
+     time from door opening to automatic close ${conf.openCloseTime} s. 😉""")
     Thread.sleep(300)
     println("""
     done.
@@ -52,7 +52,7 @@ fun main(args: Array<String>) {
         val readLine = readLine()?.replace("\n", "")?.trim() ?: continue
         if ("exit" == readLine) break
         try {
-            LiftController.addCommand(parseCommand(readLine))
+            LiftController.execute(parseCommand(readLine))
         } catch (e: IllegalArgumentException) {
             System.err.println(e)
         }
