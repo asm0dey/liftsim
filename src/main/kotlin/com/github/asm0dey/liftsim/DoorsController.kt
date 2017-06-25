@@ -4,7 +4,8 @@ import java.math.BigDecimal
 import kotlin.concurrent.thread
 
 object DoorsController {
-    @Volatile private var doorsClosed = true
+    @Volatile var doorsClosed = true
+        private set
     @Volatile private var openCloseProgress: Thread = thread(start = false) { }
 
     fun cycleDoorsIfClosed(openCloseTime: BigDecimal) {
@@ -33,5 +34,5 @@ object DoorsController {
         println("Doors are closed")
     }
 
-    fun doorsOpened() = !doorsClosed
+
 }

@@ -2,7 +2,7 @@ package com.github.asm0dey.liftsim
 
 import com.github.asm0dey.liftsim.DoorsController.closeDoors
 import com.github.asm0dey.liftsim.DoorsController.cycleDoorsIfClosed
-import com.github.asm0dey.liftsim.DoorsController.doorsOpened
+import com.github.asm0dey.liftsim.DoorsController.doorsClosed
 import com.github.asm0dey.liftsim.Where.INSIDE
 import com.github.asm0dey.liftsim.Where.OUTSIDE
 import com.github.asm0dey.liftsim.model.BuildingAndLiftConfig
@@ -21,7 +21,7 @@ object LiftController {
         while (true) {
             val (where, targetFloor) = commands.take()!!
 
-            if (busy || targetFloor != currentFloor && doorsOpened() && where == OUTSIDE) {
+            if (busy || targetFloor != currentFloor && !doorsClosed && where == OUTSIDE) {
                 println("Elevator is busy. Please, try again later.")
                 continue
             }
@@ -41,7 +41,7 @@ object LiftController {
             //we launch it in separate thread to be able to handle commands as soon as possible,
             // not waiting for lift finish its actions
             thread(name = "lift-mover") {
-                if (where == INSIDE && doorsOpened())
+                if (where == INSIDE && !doorsClosed)
                     closeDoors()
 
                 val timePerFloor = conf.floorHeight.divide(conf.speed, 3, RoundingMode.HALF_EVEN)
