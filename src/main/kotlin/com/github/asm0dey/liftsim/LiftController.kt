@@ -26,11 +26,6 @@ object LiftController {
                 continue
             }
 
-            if (targetFloor > conf.floors!! || targetFloor < 1) {
-                println("Elevator is called from nonexistent floor. Ignoring")
-                continue
-            }
-
             if (currentFloor == targetFloor) {
                 cycleDoorsIfClosed()
                 continue

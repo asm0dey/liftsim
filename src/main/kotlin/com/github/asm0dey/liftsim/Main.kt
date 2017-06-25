@@ -2,13 +2,14 @@ package com.github.asm0dey.liftsim
 
 import com.beust.jcommander.JCommander
 import com.beust.jcommander.ParameterException
-import com.github.asm0dey.liftsim.model.Where.INSIDE
-import com.github.asm0dey.liftsim.model.Where.OUTSIDE
 import com.github.asm0dey.liftsim.model.BuildingAndLiftConfig
 import com.github.asm0dey.liftsim.model.Command
+import com.github.asm0dey.liftsim.model.Where.INSIDE
+import com.github.asm0dey.liftsim.model.Where.OUTSIDE
+import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
-val executors = Executors.newFixedThreadPool(3)
+val executors: ExecutorService = Executors.newFixedThreadPool(3)
 
 fun main(args: Array<String>) {
     val conf = BuildingAndLiftConfig()
@@ -51,12 +52,12 @@ fun main(args: Array<String>) {
 """)
 
     LiftController.launch(conf)
-
+    val parser = parser(conf)
     while (true) {
         val readLine = readLine()?.replace("\n", "")?.trim() ?: continue
         if ("exit" == readLine) break
         try {
-            LiftController.invoke(parseCommand(readLine))
+            LiftController.invoke(parser(readLine))
         } catch (e: IllegalArgumentException) {
             System.err.println(e)
         }
@@ -64,20 +65,24 @@ fun main(args: Array<String>) {
     System.exit(0)
 }
 
-
-private fun parseCommand(input: String): Command {
-    val split = input.split(" ")
-    if (split.size != 2)
-        throw IllegalArgumentException("command is in incorrect format")
-    if (!(split[0].equals("i", true) || split[0].equals("o", true)))
-        throw IllegalArgumentException("it neither outside nor inside elevator call. Please, check")
-    try {
-        val floorNumber = split[1].toInt()
-        return Command(
-                where = if (split[0].equals("i", true)) INSIDE else OUTSIDE,
-                floorNumber = floorNumber
-        )
-    } catch (e: Exception) {
-        throw IllegalArgumentException("Illegal floor number: ${split[1]}", e)
+private fun parser(conf: BuildingAndLiftConfig): (String) -> Command {
+    return { input: String ->
+        val split = input.split(" ")
+        if (split.size != 2)
+            throw IllegalArgumentException("command is in incorrect format")
+        if (!(split[0].equals("i", true) || split[0].equals("o", true)))
+            throw IllegalArgumentException("it neither outside nor inside elevator call. Please, check")
+        try {
+            val floorNumber = split[1].toInt()
+            if (floorNumber > conf.floors!! || floorNumber < 1)
+                throw IllegalArgumentException("Call from nonexistent floor! It's miracle! But not reacting")
+            Command(
+                    where = if (split[0].equals("i", true)) INSIDE else OUTSIDE,
+                    floorNumber = floorNumber
+            )
+        } catch (e: NumberFormatException) {
+            throw IllegalArgumentException("Illegal floor number: ${split[1]}", e)
+        }
     }
 }
+
