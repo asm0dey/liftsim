@@ -66,8 +66,8 @@ fun main(args: Array<String>) {
 }
 
 private fun parser(conf: BuildingAndLiftConfig): (String) -> Command {
-    return { input: String ->
-        val split = input.split(" ")
+    return {
+        val split = it.split(" ")
         if (split.size != 2)
             throw IllegalArgumentException("command is in incorrect format")
         if (!(split[0].equals("i", true) || split[0].equals("o", true)))
